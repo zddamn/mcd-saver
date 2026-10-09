@@ -89,7 +89,20 @@ normalizeName("麦乐鸡4块") →  "麦乐鸡"
 
 如果只按菜单标价排序，会得出"四件套比三件套便宜 ¥5"的错误结论；真实核价是**贵 ¥22.5**。这正是本项目的核心价值：**不信任标价，只信任核价**。
 
-### 3. 券必须来自 `query-store-coupons`
+### 3. 券池有四路，但只有一路能进核价
+
+官方券相关工具共 4 个，能力并不对等：
+
+| 工具 | 返回格式 | 含 couponId/couponCode | 能否进 `calculate-price` |
+|---|---|---|---|
+| `query-store-coupons` | 结构化数组 | ✅ 有 | ✅ **能** |
+| `query-my-coupons` | markdown 文本（实测 14 张） | ❌ 无 | ❌ 不能 |
+| `available-coupons` | markdown 文本（含「状态：已领取」） | ❌ 无 | ❌ 不能 |
+| `auto-bind-coupons` | 领券（写操作） | ❌ 无 | ❌ 不能 |
+
+实测：厦门立功路门店 `query-store-coupons` 返回 0 组，而卡包里有 14 张券 —— 若只看"门店券"会误以为用户没券可用。
+
+本项目的处理：四路都查，但**只对 `query-store-coupons` 的券做核价**；卡包券转为盘点与到期提醒（实测能识别出 2 张「今日到期」：麦旋风任选 ¥9.9、薯薯任选 ¥9.9），并明确告知用户这部分需在 App 内使用，避免"工具说能省但实际用不上"的落差。
 
 `query-my-coupons` 返回的是卡包资产，不做门店/渠道校验，官方明确说明"不承诺可用于当前订单"。只有 `query-store-coupons` 返回的券才带有可用的 `couponId` / `couponCode`，可以传进 `calculate-price` 的 `items[].couponId` 完成真实核价。项目严格遵守这一约束。
 
