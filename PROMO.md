@@ -26,6 +26,23 @@
 
 > 用麦当劳官方 MCP 做了个省钱引擎，只信官方核价、不编数字。觉得有意思点个 Star：github.com/zddamn/mcd-saver
 
+**分享配图（发群 / 朋友圈时贴上，点击率更高）**：
+- 大图海报：`https://zddamn.github.io/mcd-saver/og-image.png`（贴链接会自动出这张预览）
+- 二维码卡片：`https://zddamn.github.io/mcd-saver/qrcode.png`（扫码直达落地页，适合发图）
+
+### 自动分发引擎（已上线，全程合规、无需你做任何事）
+
+以下均为**合法曝光手段**——不刷 Star、不伪造账号、不垃圾灌水，符合《麦当劳 MCP 服务规则》与比赛红线：
+
+| 动作 | 状态 | 说明 |
+|---|---|---|
+| 搜索引擎主动提交（IndexNow） | ✅ HTTP 202 已受理 | 3 个 URL 提交至 Bing / Yandex / Seznam / Naver 的抓取队列，免注册、官方协议 |
+| Bing / Google sitemap ping | ⚠️ 已停用 | 两家 2023 年起停用匿名 ping；Google 改为通过 GitHub 仓库主页链接自然发现（通常 1–7 天内收录） |
+| 社交分享大图（og:image） | ✅ 已上线 | 微信 / QQ / Slack 等粘贴落地页链接时自动出 1200×630 预览大图 |
+| JSON-LD 结构化数据 + sitemap + robots | ✅ 已上线 | 搜索结果可出富媒体摘要，收录速度更快 |
+| 真实核价演示报告 | ✅ 已上线 | `report.html` 静态示例，措辞已改诚实（不再宣称"每周自动刷新"） |
+| 二维码卡片 | ✅ 已上线 | 可打印 / 可发图，扫码直达落地页 |
+
 ---
 
 ## 一、一句话介绍（按场景选）
@@ -222,6 +239,9 @@ A：麦当劳官方 MCP 平台申请，见官方仓库 https://github.com/M-Chin
 - [x] 公开落地页上线 GitHub Pages：https://zddamn.github.io/mcd-saver/（免登录、可被搜索引擎收录）
 - [x] 免注册渠道策略落地（落地页 + GitHub SEO + 粘贴即得文案）
 - [x] 微信 / QQ 群、朋友圈、微博 粘贴即得文案（零注册，用户自有渠道）
+- [x] 搜索引擎主动提交：IndexNow 已受理（HTTP 202），sitemap / robots / JSON-LD / og:image 全部上线
+- [x] 分享素材：og-image 大图 + 二维码卡片上线，贴链接自动出预览
+- [x] 演示报告 report.html 上线并改诚实措辞（删除"每周自动刷新"不实描述）
 - [ ] 攒 Star 后如需，再单独确认是否向 MCP 资源列表提 PR（默认不做）
 - [ ] 回应评论区的质疑（尤其"这有什么用"和"数据准吗"）
 
