@@ -1,0 +1,26 @@
+{
+  "name": "mcd-saver",
+  "version": "0.1.0",
+  "description": "麦麦省钱最优解引擎 - 基于麦当劳 MCP 的套餐/单品/优惠券组合求解器，算出最低实付",
+  "main": "src/cli.js",
+  "bin": {
+    "mcd-saver": "src/cli.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "demo": "node src/cli.js best --want \"巨无霸,薯条,可乐\""
+  },
+  "keywords": [
+    "mcdonalds",
+    "mcp",
+    "skill",
+    "price-optimizer",
+    "麦麦省"
+  ],
+  "license": "MIT",
+  "private": false
+}

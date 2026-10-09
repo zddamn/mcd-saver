@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>麦麦省钱最优解 · 巨无霸 + 薯条 + 可乐</title>
+<style>
+  :root{--bg:#0f1115;--card:#171a21;--line:#252a35;--txt:#e6e9ef;--dim:#8b93a7;--gold:#ffb400;--red:#e5484d;--green:#30c85e}
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px;background:var(--bg);color:var(--txt);font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  .wrap{max-width:920px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 6px}
+  .sub{color:var(--dim);font-size:13px;margin-bottom:24px}
+  .hero{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+  .stat{flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .stat .k{color:var(--dim);font-size:12px}
+  .stat .v{font-size:22px;font-weight:700;margin-top:6px}
+  .stat .v.gold{color:var(--gold)} .stat .v.green{color:var(--green)} .stat .v.red{color:var(--red)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px 16px 16px}
+  .row{display:grid;grid-template-columns:64px 1fr 180px 78px 84px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .row.best .rank{color:var(--gold)}
+  .rank{font-size:12px;color:var(--dim)}
+  .combo{font-size:14px;line-height:1.5}
+  .tag{display:inline-block;margin-left:6px;font-size:11px;color:var(--gold);border:1px solid var(--gold);border-radius:6px;padding:1px 6px}
+  .bar-wrap{height:8px;background:#1e222b;border-radius:4px;overflow:hidden}
+  .bar{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--green),var(--gold),var(--red))}
+  .price{text-align:right;font-weight:700;font-size:15px}
+  .save{text-align:right;font-size:13px;color:var(--green)}
+  .foot{margin-top:18px;color:var(--dim);font-size:12px;line-height:1.7}
+</style></head>
+<body><div class="wrap">
+  <h1>麦麦省钱最优解</h1>
+  <div class="sub">门店 1410388 · 需求：巨无霸 + 薯条 + 可乐 · 价格由麦当劳官方 MCP <code>calculate-price</code> 实时核价</div>
+  <div class="hero">
+    <div class="stat"><div class="k">最优实付</div><div class="v gold">¥37.00</div></div>
+    <div class="stat"><div class="k">全部单点基线</div><div class="v">¥50.00</div></div>
+    <div class="stat"><div class="k">省下</div><div class="v green">¥13.00</div></div>
+    <div class="stat"><div class="k">最优/最差价差</div><div class="v red">¥37.00</div></div>
+  </div>
+  <div class="card">
+      <div class="row best">
+        <div class="rank">★ 最优</div>
+        <div class="combo">巨无霸三件套×1
+          
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:8%;--p:0"></div></div>
+        <div class="price">¥37.00</div>
+        <div class="save">省 ¥13.00</div>
+      </div>
+      <div class="row ">
+        <div class="rank">#2</div>
+        <div class="combo">可乐×1 + 巨无霸三件套×1
+          
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:30.594594594594593%;--p:25.675675675675674"></div></div>
+        <div class="price">¥46.50</div>
+        <div class="save">省 ¥3.50</div>
+      </div>
+      <div class="row ">
+        <div class="rank">#3</div>
+        <div class="combo">大堡口福三件套×1 + 巨无霸×1
+          
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:36.302702702702696%;--p:32.162162162162154"></div></div>
+        <div class="price">¥48.90</div>
+        <div class="save">省 ¥1.10</div>
+      </div>
+      <div class="row ">
+        <div class="rank">#4</div>
+        <div class="combo">巨无霸×1 + 薯条×1 + 可乐×1
+          
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:38.91891891891892%;--p:35.13513513513514"></div></div>
+        <div class="price">¥50.00</div>
+        <div class="save">+¥0.00</div>
+      </div>
+      <div class="row ">
+        <div class="rank">#5</div>
+        <div class="combo">鱼牛汉堡四件套随心选×1
+          
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:61.513513513513516%;--p:60.810810810810814"></div></div>
+        <div class="price">¥59.50</div>
+        <div class="save">+¥9.50</div>
+      </div>
+      <div class="row ">
+        <div class="rank">#6</div>
+        <div class="combo">巨无霸四件套×1
+          
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:61.513513513513516%;--p:60.810810810810814"></div></div>
+        <div class="price">¥59.50</div>
+        <div class="save">+¥9.50</div>
+      </div>
+      <div class="row ">
+        <div class="rank">#7</div>
+        <div class="combo">可乐×1 + 巨无霸四件套×1
+          
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:84.10810810810811%;--p:86.48648648648648"></div></div>
+        <div class="price">¥69.00</div>
+        <div class="save">+¥19.00</div>
+      </div>
+      <div class="row ">
+        <div class="rank">#8</div>
+        <div class="combo">薯条×1 + 巨无霸四件套×1
+          
+        </div>
+        <div class="bar-wrap"><div class="bar" style="width:96%;--p:100"></div></div>
+        <div class="price">¥74.00</div>
+        <div class="save">+¥24.00</div>
+      </div></div>
+  <div class="foot">
+    数据来源于麦当劳中国官方 MCP Server，实时拉取菜单、门店可用券，并用官方核价接口逐一验证。<br>
+    餐品价格、供应状态与券可用性以麦当劳官方渠道实时结果为准。本项目为参赛作品，非麦当劳官方产品。
+  </div>
+</div></body></html>

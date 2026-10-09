@@ -1,0 +1,13 @@
+# 切勿提交真实凭证：参赛声明要求配置文件仅使用环境变量占位符
+.env
+*.token
+mcp-config.json
+mcp.json
+
+# 依赖与缓存
+node_modules/
+.cache/
+__pycache__/
+*.log
+.DS_Store
+Thumbs.db
