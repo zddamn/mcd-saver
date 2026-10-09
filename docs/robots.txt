@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zddamn.github.io/mcd-saver/sitemap.xml
