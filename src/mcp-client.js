@@ -13,6 +13,32 @@
 
 const ENDPOINT = 'https://mcp.mcd.cn';
 
+/**
+ * 官方限制：每个 Token 每分钟最多 600 次请求，超限返回 429。
+ * 这里留 20% 余量（480/分钟）做客户端侧滑动窗口限流，避免触发 429。
+ * 单次完整求解约 45~55 次请求，连续跑 10 次才会接近上限。
+ */
+const RATE_LIMIT = { limit: 480, windowMs: 60000 };
+const recentCalls = [];
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function throttle() {
+  const now = Date.now();
+  while (recentCalls.length && now - recentCalls[0] > RATE_LIMIT.windowMs) {
+    recentCalls.shift();
+  }
+  if (recentCalls.length >= RATE_LIMIT.limit) {
+    const wait = RATE_LIMIT.windowMs - (now - recentCalls[0]) + 50;
+    recentCalls.shift();
+    await sleep(wait);
+    return throttle();
+  }
+  recentCalls.push(now);
+}
+
 function resolveToken() {
   if (process.env.MCD_MCP_TOKEN) return process.env.MCD_MCP_TOKEN;
 
@@ -42,7 +68,9 @@ function resolveToken() {
 
 let seq = 0;
 
-async function rpc(method, params) {
+async function rpc(method, params, attempt = 0) {
+  await throttle();
+
   const token = resolveToken();
   const res = await fetch(ENDPOINT, {
     method: 'POST',
@@ -53,6 +81,23 @@ async function rpc(method, params) {
     },
     body: JSON.stringify({ jsonrpc: '2.0', id: ++seq, method, params }),
   });
+
+  if (res.status === 401) {
+    throw new Error(
+      'MCP Token 无效或已过期（401）。请重新申请 Token 并更新环境变量 MCD_MCP_TOKEN。\n' +
+        '申请入口：https://open.mcd.cn/mcp → 控制台 → 激活'
+    );
+  }
+
+  if (res.status === 429) {
+    // 触发官方限流（600 次/分钟），指数退避后重试
+    if (attempt >= 3) {
+      throw new Error('已触发 MCP 限流（429），重试 3 次仍失败。请稍后再试或减少并发。');
+    }
+    const backoff = 1000 * Math.pow(2, attempt);
+    await sleep(backoff);
+    return rpc(method, params, attempt + 1);
+  }
 
   if (!res.ok) {
     throw new Error(`MCP HTTP ${res.status} ${res.statusText}`);
