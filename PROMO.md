@@ -5,6 +5,29 @@
 
 ---
 
+## 〇、零 / 免注册高效渠道（本次重点，优先做）
+
+比赛排名**只看 Star**，而 Star 来自「看到的人愿意点」。注册类社区（V2EX / 掘金 / 少数派 / 小红书 / 知乎）发帖都要账号、且转化低，**本次不做**。真正免注册、可自动持续生效的渠道只有三类，且都只需我们已有的 GitHub 账号（不碰账号下任何其他仓库）：
+
+1. **公开落地页（已上线 GitHub Pages）** —— `https://zddamn.github.io/mcd-saver/`
+   免登录即可访问、可被 Google / 百度收录，是「陌生人搜到 → 顺手 Star」的入口；已做 SEO（标题 / 描述 / 关键词 / OG 标签）。**这是本次最核心的资产。**
+2. **GitHub 站内 SEO** —— 已把 topics 扩到 15 个高搜索词（mcdonald / mcp / coupon / budget / nutrition / calorie / diet …）+ 描述 + 主页指向落地页，提升 GitHub 搜索与 Google 收录命中。
+3. **用现有账号向相关 GitHub 仓库 / 列表提 PR / Issue**（不算注册新社区，且不创建账号下其他仓库）：
+   - 已在官方挑战赛提交参赛 Issue（#10），榜单由官方按 Star 自动生成；
+   - ⚠️ 暂不向 `yzfly/Awesome-MCP-ZH` 等列表提 PR（会生成你账号下的 fork 仓库，且 0 Star 易被拒）；如需可后续单独确认。
+
+**你（用户）能零注册做的**：把下面「粘贴即得」文案丢进**微信 / QQ 群、朋友圈、微博**（你本来就有账号，不算注册新社区），熟人裂变是早期最稳的 Star 来源。
+
+### 粘贴即得（复制任意一条，丢进群 / 朋友圈 / 微博）
+
+> 麦当劳菜单标 ¥32 的「巨无霸四件套」，官方核价 ¥59.5——那个价是随单购麦金卡价，不买卡拿不到。我做了个开源 CLI，把每个套餐拆开逐个官方核价，告诉你怎么点最便宜，还发现积分商城 24 张券里 15 张已过期。github.com/zddamn/mcd-saver ⭐
+
+> 同样巨无霸+薯条+可乐：单点 ¥50，三件套 ¥37（省 26%）。点法不同价差能到 37%。工具开源零依赖：github.com/zddamn/mcd-saver
+
+> 用麦当劳官方 MCP 做了个省钱引擎，只信官方核价、不编数字。觉得有意思点个 Star：github.com/zddamn/mcd-saver
+
+---
+
 ## 一、一句话介绍（按场景选）
 
 | 场景 | 文案 |
@@ -192,10 +215,14 @@ A：麦当劳官方 MCP 平台申请，见官方仓库 https://github.com/M-Chin
 - [x] 仓库 Public，创建时间 2025-12-25 之后
 - [x] README.md / CONTEST_DECLARATION.md / MCP_INTEGRATION.md / mcp-config.example.json / workbuddy.md 齐全
 - [x] 提交报名 Issue（#10）
-- [x] 仓库 topics + description 已优化（提升 GitHub 搜索曝光）
+- [x] 仓库 topics 已扩至 15 个高搜索词（mcdonald / mcp / coupon / budget / nutrition / calorie / diet …）
+- [x] 主页 homepage 指向 GitHub Pages 落地页
 - [x] LICENSE（MIT）
 - [x] examples/ 下有真实运行输出，不看代码也能判断质量
-- [ ] 社区发布（V2EX / 掘金 / 知乎 / 小红书 / 朋友圈）
+- [x] 公开落地页上线 GitHub Pages：https://zddamn.github.io/mcd-saver/（免登录、可被搜索引擎收录）
+- [x] 免注册渠道策略落地（落地页 + GitHub SEO + 粘贴即得文案）
+- [x] 微信 / QQ 群、朋友圈、微博 粘贴即得文案（零注册，用户自有渠道）
+- [ ] 攒 Star 后如需，再单独确认是否向 MCP 资源列表提 PR（默认不做）
 - [ ] 回应评论区的质疑（尤其"这有什么用"和"数据准吗"）
 
-**渠道优先级**：V2EX/掘金（开发者密度高、Star 转化最好）→ 朋友圈/微信群（量大但转化低）→ 知乎（长尾）→ 小红书（破圈）。
+**渠道优先级（免注册优先）**：① 公开落地页 + GitHub 站内 SEO（自动持续，最高杠杆）→ ② 微信 / QQ 群、朋友圈、微博（你已有账号、零注册，熟人裂变最稳）→ ③ 攒 Star 后再考虑 MCP 资源列表 PR。注册类论坛（V2EX / 掘金 / 小红书 / 知乎）本次不做，性价比低且需注册。
