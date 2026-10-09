@@ -166,6 +166,102 @@ function kcalText(n) {
 }
 
 /**
+ * 积分商城兑换榜
+ * 只展示尚未过期、且能算出「省多少」的券；识别不了的不硬给数字。
+ */
+function printPointsRank({ account, now, deals }, { topN = 10, showExpired = false } = {}) {
+  const { rankDeals } = require('./points');
+  const ranked = rankDeals(deals, { includeExpired: showExpired });
+  const live = ranked.filter((d) => !d.expired);
+  const expiredCount = deals.length - live.length;
+
+  printHeader(`我的 ${account.currency}`);
+  console.log(
+    `  可用 ${account.available} 分 · 累计获得 ${account.accumulative} 分 · 已用 ${account.used} 分 · 已过期 ${account.expired} 分`
+  );
+  if (account.expireThisMonth > 0) {
+    console.log(`  ⚠️ 本月将过期 ${account.expireThisMonth} 分，优先换掉它们`);
+  }
+  console.log(`  当前时间：${now.date}（${now.source}）`);
+
+  if (expiredCount) {
+    console.log(
+      `\n  注：积分商城共返回 ${deals.length} 件商品，其中 ${expiredCount} 件已过期（官方列表不自动清理），已过滤。`
+    );
+  }
+
+  console.log('\n可兑换商品券（按「每 100 积分能省多少」排序）\n');
+  console.log(
+    pad('积分', 7, 'right') +
+      pad('券', 24) +
+      pad('券价', 9, 'right') +
+      pad('单点估', 10, 'right') +
+      pad('省', 9, 'right') +
+      pad('每100分', 10, 'right') +
+      pad('剩余', 9, 'right')
+  );
+  console.log('-'.repeat(78));
+
+  // 表格只放估得出价的券；估不出的统一放到下面的「待确认」列表，避免重复且误导
+  const priced = live.filter((d) => d.regular != null && d.couponPrice != null);
+  let shown = 0;
+  for (const d of priced) {
+    if (shown >= topN) break;
+    const flag = d.affordable ? '' : '✗';
+    const price = d.couponPrice != null ? yuan(d.couponPrice) : '—';
+    const regular = d.regular != null ? (d.approx ? '≈' : '') + yuan(d.regular) : '待确认';
+    const save = d.save != null ? yuan(d.save) : '—';
+    const per = d.per100 != null ? yuan(d.per100) : '—';
+    const left = d.daysLeft != null ? `${d.daysLeft} 天` : '—';
+    console.log(
+      pad(`${flag}${d.point}`, 7, 'right') +
+        pad(ellipsis(d.dealName, 22), 24) +
+        pad(price, 9, 'right') +
+        pad(regular, 10, 'right') +
+        pad(save, 9, 'right') +
+        pad(per, 10, 'right') +
+        pad(left, 9, 'right')
+    );
+    if (d.matched.length) {
+      console.log(`        └ ${d.matched.map((m) => `${m.name}(${yuan(m.price)})`).join(' + ')}${d.qty > 1 ? ' ×' + d.qty : ''}`);
+    }
+    shown++;
+  }
+
+  const pending = live.filter((d) => !(d.regular != null && d.couponPrice != null));
+  if (pending.length) {
+    console.log(`\n另有 ${pending.length} 张券不自动估价 —— 券面写的是「任选/指定」，或本店菜单没有对应单品，硬猜会给出错误数字：`);
+    for (const d of pending) {
+      console.log(`  · ${d.name}（${d.point} 分，券价 ${d.couponPrice != null ? yuan(d.couponPrice) : '见券面'}）`);
+    }
+  }
+
+  const unaffordable = live.filter((d) => !d.affordable);
+  if (unaffordable.length) {
+    const need = Math.min(...unaffordable.map((d) => d.point)) - account.available;
+    console.log(`\n✗ = 当前积分不够。最近的一张还差 ${need} 分。`);
+  }
+
+  console.log('\n说明：单点估 = 券内商品按本店菜单单点价计算；≈ 表示只识别到部分成分，实际可能更高。');
+  console.log('      本工具只做对比分析，不会替你发起兑换，兑换请在麦当劳官方渠道确认券面规则。');
+}
+
+/** 针对某笔需求，提示「用积分券可能更便宜」 */
+function printPointsForDemand(suggestions) {
+  if (!suggestions || !suggestions.length) return;
+  console.log('\n积分换券方案（比上面的最优解更省）');
+  for (const s of suggestions) {
+    const d = s.deal;
+    console.log(
+      `  · 花 ${d.point} 积分换「${d.dealName}」券（${yuan(d.couponPrice)}）`
+    );
+    console.log(`    抵掉：${s.covered.join('、')}${s.rest.length ? `；剩下单点：${s.rest.join('、')}` : ''}`);
+    console.log(`    合计 ${yuan(s.total)}，比最优现金方案省 ${yuan(s.delta)}`);
+  }
+  console.log('  注：积分为沉没成本，是否划算取决于你自己的用分习惯。');
+}
+
+/**
  * 餐品分组：低脂榜如果只按脂肪供能比全局排序，会被一堆 0 脂肪的饮料霸榜，
  * 对用户毫无参考价值。所以按「主食 / 小食 / 饮料 / 甜品」分组各推 top。
  */
@@ -365,6 +461,8 @@ module.exports = {
   printDietRank,
   printUpgrades,
   printNutritionLine,
+  printPointsRank,
+  printPointsForDemand,
   buildHtmlReport,
   pad,
   yuan,
