@@ -172,7 +172,17 @@ async function cmdBest(args) {
   if (unresolved.length) console.log(`未匹配（已忽略）：${unresolved.join('、')}`);
 
   const coupons = await loadStoreCoupons(storeCode);
-  console.log(`门店可用券：${coupons.length} 组`);
+  console.log(`门店可核价券：${coupons.length} 组`);
+
+  // 卡包券：官方只给文本、不给 couponCode，核不了价，但到期提醒很有价值
+  const mine = await loadMyCoupons();
+  if (mine.total) {
+    const expiring = mine.list.filter((c) => c.expiringToday);
+    console.log(`卡包券：${mine.total} 张（官方不返回 couponCode，无法自动核价，需你在 App 内使用）`);
+    if (expiring.length) {
+      console.log(`  ⚠️ ${expiring.length} 张今日到期：${expiring.map((c) => `${c.title}(¥${c.price})`).join('、')}`);
+    }
+  }
 
   const plans = generatePlans(menu, demand);
   console.log(`生成候选方案：${plans.length} 个`);
@@ -273,12 +283,13 @@ async function cmdCoupons(args) {
   console.log(`门店：${storeName}（${storeCode}）\n`);
 
   const store = await loadStoreCoupons(storeCode);
-  console.log(`【本店立即可用】${store.length} 组`);
+  console.log(`【本店可核价券】${store.length} 组 —— 唯一能带 couponCode 进官方核价的来源`);
   for (const c of store) {
     const names = (c.products || []).map((p) => p.productName).join('、');
     console.log(`  · ${c.title}（${c.count} 张） 适用：${names || '见券面'}`);
     console.log(`    有效期：${c.tradeDateTime || '—'}`);
   }
+  if (!store.length) console.log('  （本店暂无可核价券，换门店试试）');
 
   if (args.bind) {
     const r = await autoBind();
@@ -286,12 +297,15 @@ async function cmdCoupons(args) {
   }
 
   const mine = await loadMyCoupons();
-  const expiring = /今日到期/.test(mine.text || '');
-  console.log(`\n【卡包】已拉取${expiring ? '，⚠️ 存在「今日到期」券，建议尽快使用' : ''}`);
+  console.log(`\n【我的卡包】${mine.total} 张 —— 官方不返回 couponCode，无法自动核价，需在 App 内使用`);
+  for (const c of mine.list) {
+    console.log(`  ${c.expiringToday ? '⚠️' : '  '} ${c.title}${c.price != null ? ` ¥${c.price}` : ''}`);
+    if (c.valid) console.log(`     有效期：${c.valid}${c.tags.length ? ` · ${c.tags.join('/')}` : ''}`);
+  }
 
   const avail = await loadAvailableCoupons();
-  const claimable = /可领取/.test(avail.text || '');
-  if (claimable) console.log('【可领取】存在待领券，运行 coupons --bind 可一键领取');
+  console.log(`\n【可领取】${avail.claimable} 张待领（共 ${(avail.pending || []).length} 张在架）`);
+  if (avail.claimable) console.log('  运行 coupons --bind 可一键领取');
 }
 
 async function cmdPoints(args) {
