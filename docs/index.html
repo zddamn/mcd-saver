@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>mcd-saver · 麦麦省钱最优解引擎（基于麦当劳官方 MCP）</title>
+<meta name="description" content="同一份订单点法不同价差能到 37%。mcd-saver 基于麦当劳中国官方 MCP，逐个官方核价，戳穿随单购价陷阱，告诉你积分该换哪张券、这顿多少大卡。开源、零依赖、Node 18+。" />
+<meta name="keywords" content="麦当劳,怎么点最便宜,省钱,套餐,MCP,mcd-saver,核价,优惠券,积分,热量,低脂,低糖,开源,nodejs,cli,麦当劳MCP" />
+<meta property="og:title" content="mcd-saver · 麦麦省钱最优解引擎" />
+<meta property="og:description" content="基于麦当劳官方 MCP 的省钱引擎：逐方案官方核价，戳穿随单购价陷阱，积分换哪张券最值、热量低脂低糖一目了然。" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://github.com/zddamn/mcd-saver" />
+<meta name="twitter:card" content="summary_large_image" />
+<style>
+  :root{
+    --red:#da291c; --yellow:#ffc72c; --ink:#1d1d1f; --muted:#6b6b70;
+    --bg:#fffdf8; --card:#ffffff; --line:#f0e6d6; --green:#1a8a3c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  a{color:var(--red);text-decoration:none}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px}
+  header.nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line)}
+  .logo{font-weight:800;font-size:20px;letter-spacing:.3px}
+  .logo .x{color:var(--red)}
+  .nav .star{background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-weight:700;font-size:14px}
+  .nav .star:hover{background:var(--red)}
+  .hero{padding:54px 0 30px;text-align:center}
+  .badge{display:inline-block;background:var(--yellow);color:#3a2c00;font-weight:700;font-size:13px;
+    padding:5px 12px;border-radius:999px;margin-bottom:18px}
+  h1{font-size:38px;line-height:1.25;font-weight:800;margin-bottom:16px}
+  h1 .hl{color:var(--red)}
+  .sub{font-size:17px;color:var(--muted);max-width:640px;margin:0 auto 26px}
+  .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:12px;font-weight:700;font-size:15px}
+  .btn.primary{background:var(--red);color:#fff}
+  .btn.primary:hover{opacity:.92}
+  .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .btn.ghost:hover{border-color:var(--red);color:var(--red)}
+  .run{margin:30px auto 0;max-width:680px;background:#1d1d1f;color:#f5f5f5;border-radius:14px;
+    padding:18px 20px;text-align:left;font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:14px;overflow:auto}
+  .run .p{color:#8be9a0}.run .c{color:#ffb86c}.run .m{color:#9aa0a6}
+  .hook{background:linear-gradient(135deg,#fff3f1,#fff8e8);border:1px solid var(--line);
+    border-radius:18px;padding:30px;margin:46px 0;text-align:center}
+  .hook .big{font-size:30px;font-weight:800;margin-bottom:8px}
+  .hook .big s{color:var(--muted)}
+  .hook .big .real{color:var(--red)}
+  .hook p{color:var(--muted);max-width:560px;margin:10px auto 0}
+  section{padding:34px 0}
+  h2{font-size:26px;font-weight:800;margin-bottom:6px}
+  .lead{color:var(--muted);margin-bottom:24px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+  .card .ic{font-size:26px;margin-bottom:10px}
+  .card h3{font-size:17px;margin-bottom:6px}
+  .card p{font-size:14px;color:var(--muted)}
+  .demo{background:#fff;border:1px solid var(--line);border-radius:16px;padding:6px;overflow:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600;background:#faf6ee}
+  tr.win td{background:#f1faf2;font-weight:700}
+  .save{color:var(--green);font-weight:700}
+  .lose{color:var(--red)}
+  .code{background:#1d1d1f;color:#f5f5f5;border-radius:12px;padding:16px 18px;
+    font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13.5px;overflow:auto}
+  .code .c{color:#ffb86c}.code .g{color:#8be9a0}
+  footer{padding:40px 0;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center}
+  .note{background:#fff8e8;border:1px solid var(--yellow);border-radius:12px;padding:14px 16px;
+    font-size:13px;color:#6b5a1f;margin-top:24px}
+  @media(max-width:600px){h1{font-size:30px}.hook .big{font-size:24px}.hero{padding:36px 0 20px}}
+</style>
+</head>
+<body>
+<header class="nav wrap">
+  <div class="logo">麦麦<span class="x">省钱</span>引擎</div>
+  <a class="star" href="https://github.com/zddamn/mcd-saver" target="_blank" rel="noopener">⭐ Star on GitHub</a>
+</header>
+
+<section class="hero wrap">
+  <span class="badge">基于麦当劳中国官方 MCP · 开源 · 零依赖</span>
+  <h1>同一份订单，点法不同<br>价差能到 <span class="hl">37%</span></h1>
+  <p class="sub">mcd-saver 把每个套餐拆开、逐个调官方 <code>calculate-price</code> 核价，告诉你怎么点最便宜；顺带戳穿「随单购价」陷阱、标出积分商城里已过期的券，并把每样东西的热量算清楚。</p>
+  <div class="cta">
+    <a class="btn primary" href="https://github.com/zddamn/mcd-saver" target="_blank" rel="noopener">⭐ 去 GitHub 点个 Star</a>
+    <a class="btn ghost" href="https://github.com/zddamn/mcd-saver#快速开始" target="_blank" rel="noopener">📦 三步跑起来</a>
+  </div>
+  <div class="run">
+    <div><span class="m"># 求最低实付方案</span></div>
+    <div><span class="p">$</span> node src/cli.js best --want <span class="c">"巨无霸,薯条,可乐"</span></div>
+    <div><span class="m">  全部单点基线        ¥50.00</span></div>
+    <div><span class="m">  最优解              ¥37.00   ← 巨无霸三件套，省 26%</span></div>
+    <div><span class="m">  看起来更省的        ¥59.50   ← 巨无霸四件套，菜单标 ¥32，其实是随单购价陷阱</span></div>
+  </div>
+</section>
+
+<div class="hook wrap">
+  <div class="big">菜单标 <s>¥32</s> &nbsp;→&nbsp; <span class="real">官方核价 ¥59.50</span></div>
+  <p>「巨无霸四件套」那个 ¥32 是随单购麦金卡优惠价，不买卡根本拿不到。按标价排序会得出「四件套比三件套便宜」的错误结论——真实核价是贵 22.5 块。mcd-saver 对同一方案核两次价（常规价 + 随单购价），都给你看。</p>
+</div>
+
+<section class="wrap">
+  <h2>它解决四层肉眼算不清的信息差</h2>
+  <p class="lead">价格全部来自官方核价接口，引擎自己不做任何优惠计算——所以陷阱会被自动暴露。</p>
+  <div class="grid">
+    <div class="card"><div class="ic">🍔</div><h3>套餐 vs 单点</h3><p>巨无霸+薯条+可乐单点 ¥50，巨无霸三件套只要 ¥37，省 26%。</p></div>
+    <div class="card"><div class="ic">🪤</div><h3>随单购价陷阱</h3><p>标价比三件套便宜 5 块，真付却贵 22.5 块。引擎两个价都核给你看。</p></div>
+    <div class="card"><div class="ic">🎟️</div><h3>积分换哪张券</h3><p>积分商城一次返回 24 张券，15 张已过期（官方不清理）。过滤后按「每 100 积分省多少」排序。</p></div>
+    <div class="card"><div class="ic">🔥</div><h3>热量 / 饮食偏好</h3><p>每个餐品标热量（套餐按成分累加），支持低脂 / 低糖 / 低钠 / 高蛋白 / 低卡排序与上限过滤。</p></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <h2>真实核价输出（示例）</h2>
+  <p class="lead">需求：巨无霸 + 薯条 + 可乐。引擎枚举 8 个候选方案，逐方案官方核价后排序。</p>
+  <div class="demo">
+    <table>
+      <thead><tr><th>#</th><th>购买组合</th><th>实付</th><th>相比单点</th></tr></thead>
+      <tbody>
+        <tr class="win"><td>1 ★</td><td>巨无霸三件套 ×1</td><td>¥37.00</td><td class="save">-13.00</td></tr>
+        <tr><td>2</td><td>可乐 ×1 + 巨无霸三件套 ×1</td><td>¥46.50</td><td class="save">-3.50</td></tr>
+        <tr><td>3</td><td>大堡口福三件套 + 巨无霸 [+鸡排堡]</td><td>¥48.90</td><td class="save">-1.10</td></tr>
+        <tr><td>4</td><td>巨无霸 + 薯条 + 可乐（全单点）</td><td>¥50.00</td><td>+0.00</td></tr>
+        <tr><td>6</td><td>巨无霸四件套 [+麦乐鸡]（菜单标 ¥32）</td><td class="lose">¥59.50</td><td class="lose">+9.50</td></tr>
+        <tr><td>8</td><td>薯条 + 巨无霸四件套 [+麦乐鸡]</td><td class="lose">¥74.00</td><td class="lose">+24.00</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lead" style="margin-top:12px">最优方案 949 kcal · 蛋白 31g · 脂肪 38g · 碳水 116g。同需求最贵 ¥74，最优/最差价差 ¥37——点法不同，真金白银。</p>
+  <p style="margin-top:10px"><a href="report.html">📄 查看实时生成的演示报告（每周自动刷新）</a></p>
+</section>
+
+<section class="wrap">
+  <h2>三步跑起来</h2>
+  <p class="lead">零第三方依赖，Node 18+ 用内置 fetch 直接跑。</p>
+  <div class="code">
+<span class="g"># 1. 申请麦当劳 MCP Token（mcp.mcd.cn 控制台 → 激活）</span>
+<span class="c">git clone https://github.com/zddamn/mcd-saver.git</span>
+<span class="c">cd mcd-saver &amp;&amp; export MCD_MCP_TOKEN=你的Token</span>
+
+<span class="g"># 2. 求最低实付方案</span>
+<span class="c">node src/cli.js best --want "巨无霸,薯条,可乐"</span>
+
+<span class="g"># 3. 更多玩法</span>
+<span class="c">node src/cli.js diet --diet low-fat     # 低脂推荐</span>
+<span class="c">node src/cli.js points                  # 积分换哪张券最值</span>
+<span class="c">node src/cli.js report --want "巨无霸,薯条,可乐" --html report.html</span>
+  </div>
+  <div class="note">
+    🔒 <b>隐私</b>：Token 只存在你本地环境变量，项目不含任何真实凭证，配置仅含 <code>${MCD_MCP_TOKEN}</code> 占位符。工具只做查询与核价，不自动下单、不自动领券（领券需显式 <code>--bind</code>）。所有价格来自官方 <code>calculate-price</code>。
+  </div>
+</section>
+
+<section class="wrap" style="text-align:center">
+  <h2>觉得有意思？点个 Star ⭐</h2>
+  <p class="lead">比赛排名只看 GitHub Star。你的一颗星，就是对我们「只信官方核价、不编数字」这件事的支持。</p>
+  <a class="btn primary" href="https://github.com/zddamn/mcd-saver" target="_blank" rel="noopener">⭐ github.com/zddamn/mcd-saver</a>
+</section>
+
+<footer class="wrap">
+  <p>本项目为麦当劳程序员节创意开发大赛参赛作品，由参赛者独立开发，<b>非麦当劳官方产品</b>。</p>
+  <p>餐品价格、供应状态与券可用性以麦当劳官方渠道实时结果为准，项目输出仅供参考。遵循《麦当劳 MCP 服务规则》，仅用于实现与麦当劳 MCP 服务的连接与使用，非商业用途。</p>
+  <p style="margin-top:10px">MIT License · Node.js · 基于麦当劳中国官方 MCP</p>
+</footer>
+</body>
+</html>
