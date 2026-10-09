@@ -19,9 +19,12 @@ const {
   printDietRank,
   printUpgrades,
   printNutritionLine,
+  printPointsRank,
+  printPointsForDemand,
   buildHtmlReport,
   yuan,
 } = require('./reporter');
+const { analyzePoints, rankDeals, applyToDemand } = require('./points');
 const cache = require('./cache');
 
 const DEFAULT_STORE = '1410388'; // 示例门店（麦当劳厦门立功路餐厅），可用 --store 覆盖
@@ -55,6 +58,7 @@ function usage() {
   node src/cli.js menu                                查看套餐省钱榜
   node src/cli.js diet   --diet low-fat               按饮食偏好推荐餐品（含热量/蛋白/脂肪/碳水/钠）
   node src/cli.js coupons                             盘点我的券 / 可领券
+  node src/cli.js points                              积分商城：你的积分该换哪张券（自动过滤已过期）
   node src/cli.js report --want "巨无霸,薯条,可乐"    生成可视化 HTML 报告
 
 饮食偏好:
@@ -72,6 +76,8 @@ function usage() {
   --html <文件路径>     输出 HTML 报告
   --top <N>             展示前 N 个方案（默认 8）
   --refresh             忽略本地缓存重新拉取
+  --all                 积分榜含已过期商品
+  --no-points           best 命令跳过积分建议（省 2 次请求）
 
 环境变量:
   MCD_MCP_TOKEN         麦当劳 MCP Token（必填）
@@ -209,6 +215,26 @@ async function cmdBest(args) {
   }
   printUpgrades(suggestUpgrades(menu, demand, pref.pool[0].price, 3, verified));
 
+  // 积分维度：这笔单能不能用积分券更便宜
+  if (!args['no-points']) {
+    try {
+      const pts = await analyzePoints(menu);
+      const live = rankDeals(pts.deals);
+      const tips = applyToDemand(live, menu, demand, pref.pool[0].price);
+      if (tips.length) {
+        printPointsForDemand(tips);
+      } else {
+        const best100 = live.find((d) => d.affordable && d.per100 != null);
+        console.log(
+          `\n积分：可用 ${pts.account.available} 分，本单没有更省的换券方案` +
+            (best100 ? `；当前性价比最高的是「${best100.dealName}」（${best100.point} 分省 ${yuan(best100.save)}）` : '')
+        );
+      }
+    } catch (e) {
+      console.log(`\n（积分模块不可用：${e.message}）`);
+    }
+  }
+
   if (args.html) {
     const html = buildHtmlReport({
       demandText: wants.join(' + '),
@@ -268,6 +294,17 @@ async function cmdCoupons(args) {
   if (claimable) console.log('【可领取】存在待领券，运行 coupons --bind 可一键领取');
 }
 
+async function cmdPoints(args) {
+  const { storeCode, storeName } = await resolveStore(args);
+  console.log(`门店：${storeName}（${storeCode}）`);
+  const menu = await ensureMenu(args, storeCode);
+  const pts = await analyzePoints(menu);
+  printPointsRank(pts, {
+    topN: Number(args.top || 10),
+    showExpired: !!args.all,
+  });
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const cmd = args._[0];
@@ -277,6 +314,7 @@ async function main() {
     else if (cmd === 'menu') await cmdMenu(args);
     else if (cmd === 'diet') await cmdDiet(args);
     else if (cmd === 'coupons') await cmdCoupons(args);
+    else if (cmd === 'points') await cmdPoints(args);
     else if (cmd === 'report') {
       args.html = args.html || 'report.html';
       await cmdBest(args);
