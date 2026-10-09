@@ -85,6 +85,21 @@ function printPlans(plans, baseline, demandText) {
   }
   printNutritionLine(best.nutrition);
 
+  // 随单购对比：方案池里只要有带卡价差的，就单独讲清楚
+  const wo = plans.find((p) => p.withOrderPrice != null && p.price - p.withOrderPrice > 1);
+  if (wo) {
+    const gap = round2(wo.price - wo.withOrderPrice);
+    console.log(
+      `\n随单购对比：${wo.items.map((i) => i.name).join(' + ')}`
+    );
+    console.log(
+      `  常规价 ${yuan(wo.price)} → 随单购价 ${yuan(wo.withOrderPrice)}（省 ${yuan(gap)}）`
+    );
+    console.log(
+      `  注：随单购价需持有效麦金卡（「${wo.withOrderName}」带 withOrder 优惠），卡费另计且未计入，值不值看你一个月吃几次`
+    );
+  }
+
   if (plans.length > 1) {
     const worst = plans[plans.length - 1];
     const gap = round2(worst.price - best.price);
