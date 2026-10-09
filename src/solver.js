@@ -241,10 +241,40 @@ async function evaluatePlans(menu, plans, coupons, { limit = 12, demand } = {}) 
   const results = [];
 
   const candidatePlans = plans.slice(0, limit);
+  // 随单购核价要额外打接口，只给靠前的方案算，控制请求量（官方限制 600 次/分钟）
+  const WO_PLAN_LIMIT = 5;
 
-  for (const plan of candidatePlans) {
+  for (const [pi, plan] of candidatePlans.entries()) {
     const codes = new Set(plan.items.map((i) => i.code));
     const couponHits = coupons && coupons.length ? matchCoupons(coupons, codes) : [];
+
+    // 随单购价：菜单上带 withOrder 的餐品，持有麦金卡时是另一个价
+    let withOrderPrice = null;
+    let withOrderName = null;
+    if (pi < WO_PLAN_LIMIT) {
+      const woMeal = plan.items
+        .map((i) => menu.meals.get(i.code))
+        .find((m) => m && m.withOrder && m.withOrder.membershipCode);
+      if (woMeal) {
+        const woItems = plan.items.map((i) => ({ productCode: i.code, quantity: i.qty }));
+        try {
+          const r2 = await callTool('calculate-price', {
+            ...storeArgs,
+            items: woItems,
+            withOrder: {
+              membershipCode: woMeal.withOrder.membershipCode,
+              membershipSpecId: woMeal.withOrder.specId,
+            },
+          });
+          if (r2.data && r2.data.price !== undefined) {
+            withOrderPrice = fen(r2.data.price);
+            withOrderName = woMeal.name;
+          }
+        } catch (_) {
+          /* 随单购核价失败不影响主流程 */
+        }
+      }
+    }
 
     const variants = [{ coupon: null }];
     for (const hit of couponHits.slice(0, 3)) variants.push({ coupon: hit });
@@ -272,6 +302,8 @@ async function evaluatePlans(menu, plans, coupons, { limit = 12, demand } = {}) 
           items: plan.items.map((i) => ({ ...i })),
           nutrition: sumNutrition(itemsWithNut),
           extras: demand ? getExtras(menu, plan, demand) : [],
+          withOrderPrice: v.coupon ? null : withOrderPrice, // 券与随单购不叠加，只给无券版
+          withOrderName: v.coupon ? null : withOrderName,
           coupon: v.coupon ? { title: v.coupon.coupon.title, productName: v.coupon.productName } : null,
           price: fen(d.price),
           originalPrice: fen(d.originalPrice),
